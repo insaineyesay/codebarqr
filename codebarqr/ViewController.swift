@@ -9,35 +9,30 @@ import AVFoundation
 import UIKit
 
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
-    var captureSession: AVCaptureSession!
+    var sessionService = AVSessionService.shared
+    var captureSession = AVCaptureSession()
     var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    override var prefersStatusBarHidden: Bool {
+        return true
+    }
+    
+    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
+        return .portrait
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         view.backgroundColor = UIColor.black
-        captureSession = AVCaptureSession()
-        
-        func setUpPreviewLayer() {
-            previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
-            previewLayer.frame = view.layer.bounds
-            previewLayer.videoGravity = .resizeAspectFill
-            view.layer.addSublayer(previewLayer)
-            
-//            captureSession.startRunning()
-            startRunningCaptureSession()
-        }
-        
-//        func clearPreviewLayer() {
-//            previewLayer.fr
-//        }
+        captureSession = sessionService.captureSession
+        let videoInput: AVCaptureDeviceInput
+        let metadataOutput = AVCaptureMetadataOutput()
         
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
             return
         }
-        
-        let videoInput: AVCaptureDeviceInput
-        
+                
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
@@ -51,7 +46,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
             return
         }
         
-        let metadataOutput = AVCaptureMetadataOutput()
         
         if (captureSession.canAddOutput(metadataOutput)) {
             captureSession.addOutput(metadataOutput)
@@ -67,19 +61,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         
     }
 
-    func failed() {
-        let ac = UIAlertController(title: "Scanning not supported", message: "Your device does not support scanning a code from an item. Please use a device with a camera.", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
-        captureSession = nil
-    }
-    
-    func startRunningCaptureSession() {
-        if (captureSession?.isRunning == false) {
-            captureSession.startRunning()
-        }
-    }
-    
+    // MARK: Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -89,10 +71,34 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         
-        if (captureSession?.isRunning == true) {
+        if (captureSession.isRunning == true) {
             captureSession.stopRunning()
         }
     }
+    
+    // MARK: Interface
+    func setUpPreviewLayer() {
+        previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        previewLayer.frame = view.layer.bounds
+        previewLayer.videoGravity = .resizeAspectFill
+        view.layer.addSublayer(previewLayer)
+        
+        startRunningCaptureSession()
+    }
+
+    func failed() {
+        let ac = UIAlertController(title: "Scanning not supported", message: "Your device does not support scanning a code from an item. Please use a device with a camera.", preferredStyle: .alert)
+        ac.addAction(UIAlertAction(title: "OK", style: .default))
+        present(ac, animated: true)
+//        captureSession = nil
+    }
+    
+    func startRunningCaptureSession() {
+        if (captureSession.isRunning == false) {
+            captureSession.startRunning()
+        }
+    }
+    
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
 //        captureSession.stopRunning()
@@ -109,19 +115,16 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     
     func found(code: String) {
         let alert = UIAlertController(title: "ya codes", message: "yeah... your codes is heah: \(code)", preferredStyle: .alert )
-        alert.addAction(UIAlertAction(title: "Nice..", style: .default, handler: { (action) in
-//            self.startRunningCaptureSession()
+        alert.addAction(UIAlertAction(title: "Open in Search..", style: .default, handler: { (action) in
+            self.captureSession.stopRunning()
+            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
+                UIApplication.shared.open(url)
+            }
         }))
-//        print(code)
+        print(code)
         self.present(alert, animated: true)
     }
     
-    override var prefersStatusBarHidden: Bool {
-        return true
-    }
     
-    override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
-        return .portrait
-    }
 }
 
