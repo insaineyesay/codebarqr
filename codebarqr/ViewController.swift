@@ -70,7 +70,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             captureSession.addOutput(metadataOutput)
             
             metadataOutput.setMetadataObjectsDelegate(self, queue: DispatchQueue.main)
-            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .pdf417, AVMetadataObject.ObjectType.qr]
+            metadataOutput.metadataObjectTypes = [.ean8, .ean13, .pdf417, AVMetadataObject.ObjectType.qr, .code39, .code128, .dataMatrix, .upce]
         } else {
             failed()
             return
