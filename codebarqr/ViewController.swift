@@ -11,10 +11,13 @@ import SwiftUI
 import SafariServices
 
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate {
+    // create an instance of the AV Session service
     var sessionService = AVSessionService.shared
+    // Create a capture session to connect inputs and outputs to
     var captureSession = AVCaptureSession()
+    // Add a preview layer so that the camear input can be viewed
     var previewLayer: AVCaptureVideoPreviewLayer!
-    
+    // Create a UIView to act as a transparent layer over the camera view
     let backgroundView: UIView = {
         let v = UIView()
         v.translatesAutoresizingMaskIntoConstraints = false
@@ -22,13 +25,13 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         return v
     }()
     
+    // Reference to storyboard UIView
     @IBOutlet weak var camOverlayImageView: UIImageView!
-    
-    
+    // Hide the status bar
     override var prefersStatusBarHidden: Bool {
         return true
     }
-    
+    // Only support portrait mode. This could also be done in the info.plist settings
     override var supportedInterfaceOrientations: UIInterfaceOrientationMask {
         return .portrait
     }
@@ -37,14 +40,18 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         view.backgroundColor = UIColor.black
+        // set the global capture session
         captureSession = sessionService.captureSession
+        // set up an input
         let videoInput: AVCaptureDeviceInput
+        // set up an output
         let metadataOutput = AVCaptureMetadataOutput()
-        
+        // find a capture device for video (which is also used for images)
         guard let videoCaptureDevice = AVCaptureDevice.default(for: .video) else {
             return
         }
-                
+        
+        // if we can't assign the capture device as an input, fail
         do {
             videoInput = try AVCaptureDeviceInput(device: videoCaptureDevice)
         } catch {
@@ -157,30 +164,24 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     }
     
     func found(code: String) {
-//        let alert = UIAlertController(title: "ya codes", message: "yeah... your codes is heah: \(code)", preferredStyle: .alert )
-//        alert.addAction(UIAlertAction(title: "Open in Search..", style: .default, handler: { (action) in
-//            self.captureSession.stopRunning()
-//            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
-//                UIApplication.shared.open(url)
-//            }
-//        }))
-//        print(code)
-//        self.present(alert, animated: true)
-        
-        // TODO: Open it in Safari
-        let payloadString = code
-        guard
-            let url = URL(string: payloadString),
-            ["http", "https"].contains(url.scheme?.lowercased())
-        else { return }
-        
-        let config = SFSafariViewController.Configuration()
-        config.entersReaderIfAvailable = true
-        
-        let safariVC = SFSafariViewController(url: url, configuration: config)
-        safariVC.delegate = self
-        present(safariVC, animated: true)
+        if code.contains("http") {
+            // TODO: Open it in Safari if has a URL associated, otherwise do a duck duck go api request
+            let payloadString = code
+            guard
+                let url = URL(string: payloadString),
+                ["http", "https"].contains(url.scheme?.lowercased())
+            else { return }
+            
+            let config = SFSafariViewController.Configuration()
+            config.entersReaderIfAvailable = true
+            
+            let safariVC = SFSafariViewController(url: url, configuration: config)
+            safariVC.delegate = self
+            present(safariVC, animated: true)
+        } else {
+            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
+                UIApplication.shared.open(url)
+            }
+        }
     }
-    
-    
 }
