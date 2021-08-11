@@ -7,11 +7,23 @@
 
 import AVFoundation
 import UIKit
+import SwiftUI
+import SafariServices
 
-class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate {
     var sessionService = AVSessionService.shared
     var captureSession = AVCaptureSession()
     var previewLayer: AVCaptureVideoPreviewLayer!
+    
+    let backgroundView: UIView = {
+        let v = UIView()
+        v.translatesAutoresizingMaskIntoConstraints = false
+        v.backgroundColor = UIColor.black.withAlphaComponent(0.45)
+        return v
+    }()
+    
+    @IBOutlet weak var camOverlayImageView: UIImageView!
+    
     
     override var prefersStatusBarHidden: Bool {
         return true
@@ -76,12 +88,43 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
         }
     }
     
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+        // Create the initial layer from the view bounds.
+        let maskLayer = CAShapeLayer()
+        maskLayer.frame = backgroundView.bounds
+        maskLayer.fillColor = UIColor.white.cgColor
+        maskLayer.lineDashPattern = [50, 275, 50, 0, 50, 155, 50, 0, 50, 275, 50, 0, 50, 157, 50]
+        maskLayer.strokeColor = UIColor.white.cgColor
+        maskLayer.lineWidth = 5
+        
+        // Create the path.
+        let path = UIBezierPath(rect: backgroundView.bounds)
+        maskLayer.fillRule = CAShapeLayerFillRule.evenOdd
+        
+        // Append the overlay image to the path so that it is subtracted.
+        path.append(UIBezierPath(rect: camOverlayImageView.frame))
+        maskLayer.path = path.cgPath
+        
+        // Set the mask of the view.
+        backgroundView.layer.mask = maskLayer
+    }
+    
     // MARK: Interface
     func setUpPreviewLayer() {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.layer.bounds
         previewLayer.videoGravity = .resizeAspectFill
         view.layer.addSublayer(previewLayer)
+        
+        view.addSubview(backgroundView)
+        NSLayoutConstraint.activate([
+            backgroundView.topAnchor.constraint(equalTo: view.topAnchor),
+            backgroundView.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+            backgroundView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
+            backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
+        ])
         
         startRunningCaptureSession()
     }
@@ -114,17 +157,30 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate {
     }
     
     func found(code: String) {
-        let alert = UIAlertController(title: "ya codes", message: "yeah... your codes is heah: \(code)", preferredStyle: .alert )
-        alert.addAction(UIAlertAction(title: "Open in Search..", style: .default, handler: { (action) in
-            self.captureSession.stopRunning()
-            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
-                UIApplication.shared.open(url)
-            }
-        }))
-        print(code)
-        self.present(alert, animated: true)
+//        let alert = UIAlertController(title: "ya codes", message: "yeah... your codes is heah: \(code)", preferredStyle: .alert )
+//        alert.addAction(UIAlertAction(title: "Open in Search..", style: .default, handler: { (action) in
+//            self.captureSession.stopRunning()
+//            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
+//                UIApplication.shared.open(url)
+//            }
+//        }))
+//        print(code)
+//        self.present(alert, animated: true)
+        
+        // TODO: Open it in Safari
+        let payloadString = code
+        guard
+            let url = URL(string: payloadString),
+            ["http", "https"].contains(url.scheme?.lowercased())
+        else { return }
+        
+        let config = SFSafariViewController.Configuration()
+        config.entersReaderIfAvailable = true
+        
+        let safariVC = SFSafariViewController(url: url, configuration: config)
+        safariVC.delegate = self
+        present(safariVC, animated: true)
     }
     
     
 }
-
