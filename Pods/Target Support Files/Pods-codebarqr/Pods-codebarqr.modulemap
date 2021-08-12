@@ -1,0 +1,6 @@
+framework module Pods_codebarqr {
+  umbrella header "Pods-codebarqr-umbrella.h"
+
+  export *
+  module * { export * }
+}
