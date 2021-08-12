@@ -179,7 +179,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             safariVC.delegate = self
             present(safariVC, animated: true)
         } else {
-            if let url = URL(string: "https://api.duckduckgo.com/?q=\(code)") {
+            if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
                 UIApplication.shared.open(url)
             }
         }
