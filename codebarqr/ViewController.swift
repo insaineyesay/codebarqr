@@ -14,6 +14,7 @@ import GoogleMobileAds
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate {
     // reference for the google ad interstitial
     private var interstitial: GADInterstitialAd?
+    let logger = CodebarLogger.shared
     // create an instance of the AV Session service
     var sessionService = AVSessionService.shared
     // Create a capture session to connect inputs and outputs to
