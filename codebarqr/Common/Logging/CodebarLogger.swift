@@ -6,18 +6,20 @@
 //
 
 import Foundation
+import os
 
 class CodebarLogger {
     static let shared = CodebarLogger()
     
-    // Interface
-    func log(_ message: String) {
-        #if DEBUG
-        if !message.isEmpty {
-            print(message)
-        } else {
-            print("No messages to log")
-        }
-        #endif
+    func log(_ message: StaticString) {
+        os_log(message, log: Log.camera)
     }
+        
+}
+
+// Interface
+private let subsystem = "com.ajira.codebarqr"
+
+struct Log {
+    static let camera = OSLog(subsystem: subsystem, category: "camera")
 }

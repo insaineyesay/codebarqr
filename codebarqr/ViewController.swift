@@ -56,7 +56,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
                                request: request,
                                completionHandler: {[self] ad, error in
                                 if let error = error {
-                                    logger.log("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                                    logger.log("Failed to load interstitial ad with error: ")
                                     return
                                 }
                                 interstitial = ad
@@ -204,7 +204,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        //        captureSession.stopRunning()
+        captureSession.stopRunning()
         
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
