@@ -1,6 +1,0 @@
-framework module Pods_codebarqrTests {
-  umbrella header "Pods-codebarqrTests-umbrella.h"
-
-  export *
-  module * { export * }
-}

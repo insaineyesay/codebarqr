@@ -9,8 +9,11 @@ import AVFoundation
 import UIKit
 import SwiftUI
 import SafariServices
+import GoogleMobileAds
 
-class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate {
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate {
+    // reference for the google ad interstitial
+    private var interstitial: GADInterstitialAd?
     // create an instance of the AV Session service
     var sessionService = AVSessionService.shared
     // Create a capture session to connect inputs and outputs to
@@ -25,6 +28,14 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         return v
     }()
     
+    var barcode: String?
+    
+    #if DEBUG
+    var adUnitID = "ca-app-pub-3940256099942544/4411468910"
+    #else
+    var adUnitID = "ca-app-pub-7134449571312427/9058003570"
+    #endif
+    
     // Reference to storyboard UIView
     @IBOutlet weak var camOverlayImageView: UIImageView!
     // Hide the status bar
@@ -38,7 +49,19 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+        // TODO: Need to move all Google Ad functionalities to a service
+        let request = GADRequest()
+        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+                               request: request,
+                               completionHandler: {[self] ad, error in
+                                if let error = error {
+                                    print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                                    return
+                                }
+                                interstitial = ad
+                                interstitial?.fullScreenContentDelegate = self
+                               })
+        
         view.backgroundColor = UIColor.black
         // set the global capture session
         captureSession = sessionService.captureSession
@@ -79,7 +102,30 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         setUpPreviewLayer()
         
     }
-
+    
+    // MARK: Goole Add stuff
+    
+    /// Tells the delegate that the ad failed to present full screen content.
+    func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        print("Ad did fail to present full screen content.")
+        if let barcode = barcode {
+            openWebSearch(barcode)
+        }
+    }
+    
+    /// Tells the delegate that the ad presented full screen content.
+    func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        print("Ad did present full screen content.")
+    }
+    
+    /// Tells the delegate that the ad dismissed full screen content.
+    func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
+        print("Ad did dismiss full screen content.")
+        if let barcode = barcode {
+            openWebSearch(barcode)
+        }
+    }
+    
     // MARK: Lifecycle
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -119,6 +165,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     }
     
     // MARK: Interface
+    
+    func openWebSearch(_ code: String) {
+        if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
+            UIApplication.shared.open(url)
+        }
+    }
     func setUpPreviewLayer() {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.layer.bounds
@@ -135,12 +187,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         
         startRunningCaptureSession()
     }
-
+    
     func failed() {
         let ac = UIAlertController(title: "Scanning not supported", message: "Your device does not support scanning a code from an item. Please use a device with a camera.", preferredStyle: .alert)
         ac.addAction(UIAlertAction(title: "OK", style: .default))
         present(ac, animated: true)
-//        captureSession = nil
+        //        captureSession = nil
     }
     
     func startRunningCaptureSession() {
@@ -151,7 +203,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-//        captureSession.stopRunning()
+        //        captureSession.stopRunning()
         
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
@@ -160,7 +212,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             found(code: stringValue)
         }
         
-//        dismiss(animated: true)
+        //        dismiss(animated: true)
     }
     
     func found(code: String) {
@@ -177,11 +229,58 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             
             let safariVC = SFSafariViewController(url: url, configuration: config)
             safariVC.delegate = self
+            
+            showGoogleAds()
+            
             present(safariVC, animated: true)
         } else {
-            if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
-                UIApplication.shared.open(url)
+            showGoogleAds()
+            barcode = code
+            //            if !code.isEmpty {
+            //                let group = DispatchGroup()
+            //
+            //                let urls = [
+            //                    URL(string: "https://www.target.com/s?searchTerm=\(code)"),
+            //                    URL(string: "https://google.com/search?q=\(code)"),
+            //                    URL(string: "https://amazon.com/s?k=\(code)")
+            //                ]
+            //                UIApplication.shared.open(url)
+            //                for url in urls {
+            //                    group.enter()
+            //                    if let url = url { performRequest(urlString: url) }
+            //                }
+            //            }
+        }
+    }
+    
+    func showGoogleAds() {
+        // show google interstitial ad
+        if interstitial != nil {
+            print("google ads!")
+            interstitial?.present(fromRootViewController: self)
+        } else {
+            print("Ad wasn't ready")
+        }
+    }
+    
+    func performRequest(urlString: URL) {
+        // 1. Create a URL
+        let url = urlString
+        print("url = \(url)")
+        // 2. Create a URL Session
+        let session = URLSession(configuration: .default)
+        // 3. Create a session task
+        let task = session.dataTask(with: url) { (data, response, error) in
+            if error != nil {
+                print(error!)
+                return
+            }
+            
+            if let safeData = data {
+                print("data returned!")
             }
         }
+        // 4. Start the task
+        task.resume()
     }
 }
