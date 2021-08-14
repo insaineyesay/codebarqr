@@ -28,6 +28,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         return v
     }()
     
+    var barcode: String?
+    
     // Reference to storyboard UIView
     @IBOutlet weak var camOverlayImageView: UIImageView!
     // Hide the status bar
@@ -110,6 +112,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     /// Tells the delegate that the ad dismissed full screen content.
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
         print("Ad did dismiss full screen content.")
+        if let barcode = barcode {
+            openWebSearch(barcode)
+        }
     }
     
     // MARK: Lifecycle
@@ -151,6 +156,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     }
     
     // MARK: Interface
+    
+    func openWebSearch(_ code: String) {
+        if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
+            UIApplication.shared.open(url)
+        }
+    }
     func setUpPreviewLayer() {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.layer.bounds
@@ -210,30 +221,36 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             let safariVC = SFSafariViewController(url: url, configuration: config)
             safariVC.delegate = self
             
-            // show google interstitial ad
-            if interstitial != nil {
-                interstitial?.present(fromRootViewController: self)
-            } else {
-                print("Ad wasn't ready")
-            }
+            showGoogleAds()
             
             present(safariVC, animated: true)
         } else {
-            //            if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
-            if !code.isEmpty {
-                let group = DispatchGroup()
-                
-                let urls = [
-                    URL(string: "https://www.target.com/s?searchTerm=\(code)"),
-                    URL(string: "https://google.com/search?q=\(code)"),
-                    URL(string: "https://amazon.com/s?k=\(code)")
-                ]
-                //                UIApplication.shared.open(url)
-                for url in urls {
-                    group.enter()
-                    if let url = url { performRequest(urlString: url) }
-                }
-            }
+            showGoogleAds()
+            barcode = code
+            //            if !code.isEmpty {
+            //                let group = DispatchGroup()
+            //
+            //                let urls = [
+            //                    URL(string: "https://www.target.com/s?searchTerm=\(code)"),
+            //                    URL(string: "https://google.com/search?q=\(code)"),
+            //                    URL(string: "https://amazon.com/s?k=\(code)")
+            //                ]
+            //                UIApplication.shared.open(url)
+            //                for url in urls {
+            //                    group.enter()
+            //                    if let url = url { performRequest(urlString: url) }
+            //                }
+            //            }
+        }
+    }
+    
+    func showGoogleAds() {
+        // show google interstitial ad
+        if interstitial != nil {
+            print("google ads!")
+            interstitial?.present(fromRootViewController: self)
+        } else {
+            print("Ad wasn't ready")
         }
     }
     
