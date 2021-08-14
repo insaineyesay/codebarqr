@@ -51,7 +51,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         super.viewDidLoad()
         // TODO: Need to move all Google Ad functionalities to a service
         let request = GADRequest()
-        GADInterstitialAd.load(withAdUnitID: "ca-app-pub-3940256099942544/4411468910",
+        GADInterstitialAd.load(withAdUnitID: adUnitID,
                                request: request,
                                completionHandler: {[self] ad, error in
                                 if let error = error {
@@ -260,6 +260,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             interstitial?.present(fromRootViewController: self)
         } else {
             print("Ad wasn't ready")
+            if let barcode = barcode {
+                openWebSearch(barcode)
+            }
         }
     }
     
