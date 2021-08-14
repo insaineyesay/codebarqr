@@ -30,6 +30,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     var barcode: String?
     
+    #if DEBUG
+    var adUnitID = "ca-app-pub-3940256099942544/4411468910"
+    #else
+    var adUnitID = "ca-app-pub-7134449571312427/9058003570"
+    #endif
+    
     // Reference to storyboard UIView
     @IBOutlet weak var camOverlayImageView: UIImageView!
     // Hide the status bar
