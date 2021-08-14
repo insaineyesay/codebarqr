@@ -12,10 +12,12 @@ class CodebarLogger {
     
     // Interface
     func log(_ message: String) {
+        #if DEBUG
         if !message.isEmpty {
             print(message)
         } else {
             print("No messages to log")
         }
+        #endif
     }
 }
