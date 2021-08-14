@@ -102,6 +102,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     /// Tells the delegate that the ad failed to present full screen content.
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
         print("Ad did fail to present full screen content.")
+        if let barcode = barcode {
+            openWebSearch(barcode)
+        }
     }
     
     /// Tells the delegate that the ad presented full screen content.
