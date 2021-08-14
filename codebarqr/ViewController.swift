@@ -56,7 +56,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
                                request: request,
                                completionHandler: {[self] ad, error in
                                 if let error = error {
-                                    print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                                    logger.log("Failed to load interstitial ad with error: \(error.localizedDescription)")
                                     return
                                 }
                                 interstitial = ad
@@ -108,7 +108,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad failed to present full screen content.
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("Ad did fail to present full screen content.")
+        logger.log("Ad did fail to present full screen content.")
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -116,12 +116,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad presented full screen content.
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        print("Ad did present full screen content.")
+        logger.log("Ad did present full screen content.")
     }
     
     /// Tells the delegate that the ad dismissed full screen content.
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        print("Ad did dismiss full screen content.")
+        logger.log("Ad did dismiss full screen content.")
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -257,34 +257,34 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     func showGoogleAds() {
         // show google interstitial ad
         if interstitial != nil {
-            print("google ads!")
+            logger.log("google ads!")
             interstitial?.present(fromRootViewController: self)
         } else {
-            print("Ad wasn't ready")
+            logger.log("Ad wasn't ready")
             if let barcode = barcode {
                 openWebSearch(barcode)
             }
         }
     }
     
-    func performRequest(urlString: URL) {
-        // 1. Create a URL
-        let url = urlString
-        print("url = \(url)")
-        // 2. Create a URL Session
-        let session = URLSession(configuration: .default)
-        // 3. Create a session task
-        let task = session.dataTask(with: url) { (data, response, error) in
-            if error != nil {
-                print(error!)
-                return
-            }
-            
-            if let safeData = data {
-                print("data returned!")
-            }
-        }
-        // 4. Start the task
-        task.resume()
-    }
+//    func performRequest(urlString: URL) {
+//        // 1. Create a URL
+//        let url = urlString
+//        logger.log("url = \(url)")
+//        // 2. Create a URL Session
+//        let session = URLSession(configuration: .default)
+//        // 3. Create a session task
+//        let task = session.dataTask(with: url) { (data, response, error) in
+//            if error != nil {
+//                logger.log(error!)
+//                return
+//            }
+//
+//            if let safeData = data {
+//                logger.log("data returned!")
+//            }
+//        }
+//        // 4. Start the task
+//        task.resume()
+//    }
 }
