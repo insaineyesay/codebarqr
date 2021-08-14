@@ -260,6 +260,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             interstitial?.present(fromRootViewController: self)
         } else {
             print("Ad wasn't ready")
+            if let barcode = barcode {
+                openWebSearch(barcode)
+            }
         }
     }
     
