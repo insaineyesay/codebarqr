@@ -211,12 +211,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         
-        //        let captureOutput = AVCaptureVideoDataOutput()
-        //        // TODO: Set video sample rate
-        //        captureOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
-        //        captureOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default))
-        //        captureSession.addOutput(captureOutput)
-        
         startRunningCaptureSession()
     }
     
@@ -266,22 +260,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     func found(code: String) {
         if code.contains("http") {
-            // TODO: Open it in Safari if has a URL associated, otherwise do a duck duck go api request
-//            let payloadString = code
-//            guard
-//                let url = URL(string: payloadString),
-//                ["http", "https"].contains(url.scheme?.lowercased())
-//            else { return }
-//
-//            let config = SFSafariViewController.Configuration()
-//            config.entersReaderIfAvailable = true
-//
-//            let safariVC = SFSafariViewController(url: url, configuration: config)
-//            safariVC.delegate = self
-//
-//            showGoogleAds()
-//
-//            present(safariVC, animated: true)
             observationHandler(payload: code)
         } else {
             showGoogleAds()
@@ -309,12 +287,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             interstitial?.present(fromRootViewController: self)
         } else {
             logger.log("Ad wasn't ready", type: .info)
-//            if let barcode = barcode {
-//                if barcode.contains("http") {
-//                    observationHandler(payload: barcode)
-//                }
-//                openWebSearch(barcode)
-//            }
         }
     }
 }
@@ -337,39 +309,6 @@ extension ViewController {
         }
     }
     
-    //     private func setupCameraLiveView() {
-    //        // TODO: Setup captureSession
-    //        captureSession.sessionPreset = .hd1280x720
-    //
-    //        // TODO: Add input
-    //        let videoDevice = AVCaptureDevice
-    //            .default(.builtInWideAngleCamera, for: .video, position: .back)
-    //
-    //        guard
-    //            let device = videoDevice,
-    //            let videoDeviceInput = try? AVCaptureDeviceInput(device: device),
-    //            captureSession.canAddInput(videoDeviceInput) else {
-    //            showAlert(
-    //                withTitle: "Cannot Find Camera",
-    //                message: "There seems to be a problem with the camera on your device.")
-    //            return
-    //        }
-    //
-    //        captureSession.addInput(videoDeviceInput)
-    //
-    //        // TODO: Add output
-    //        let captureOutput = AVCaptureVideoDataOutput()
-    //        // TODO: Set video sample rate
-    //        captureOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
-    //        captureOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default))
-    //        captureSession.addOutput(captureOutput)
-    //
-    //        configurePreviewLayer()
-    //
-    //        // TODO: Run session
-    //        captureSession.startRunning()
-    //    }
-    
     // MARK: - Vision
     func processClassification(_ request: VNRequest) {
         // 1
@@ -385,22 +324,6 @@ extension ViewController {
                         let potentialQRCode = barcode as? VNBarcodeObservation,
                         potentialQRCode.confidence > 0.9
                     else { return }
-                    
-                    // 3
-                    //                    showAlert(
-                    //                        withTitle: potentialQRCode.symbology.rawValue,
-                    //                        // TODO: Check the confidence score
-                    //                        message: String(potentialQRCode.confidence), actionButtonText: "OK")
-                    
-//                    if potentialQRCode.symbology == .QR {
-//                        print("wtf man")
-//                        observationHandler(payload: potentialQRCode.payloadStringValue)
-//                    } else {
-//                        print("is this thing on")
-//                        if let barcode = potentialQRCode.payloadStringValue {
-//                            found(code: barcode)
-//                        }
-//                    }
                 }
             }
             
