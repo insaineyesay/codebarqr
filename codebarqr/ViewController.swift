@@ -119,7 +119,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         
     }
     
-    // MARK: Goole Add stuff
+    // MARK: Goole Ad stuff
     
     /// Tells the delegate that the ad failed to present full screen content.
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
