@@ -10,8 +10,9 @@ import UIKit
 import SwiftUI
 import SafariServices
 import GoogleMobileAds
+import Vision
 
-class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate {
+class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
     // reference for the google ad interstitial
     private var interstitial: GADInterstitialAd?
     let logger = CodebarLogger.shared
@@ -28,6 +29,15 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         v.backgroundColor = UIColor.black.withAlphaComponent(0.45)
         return v
     }()
+    lazy var detectBarcodeRequest = VNDetectBarcodesRequest {
+        request, error in
+        guard error == nil else {
+            self.showAlert(withTitle: "Barcode Error", message: error?.localizedDescription ?? "error", actionButtonText: "OK")
+            return
+        }
+        
+        self.processClassification(request)
+    }
     
     var barcode: String?
     
@@ -50,6 +60,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        checkPermissions()
         // TODO: Need to move all Google Ad functionalities to a service
         let request = GADRequest()
         GADInterstitialAd.load(withAdUnitID: adUnitID,
@@ -67,6 +79,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         view.backgroundColor = UIColor.black
         // set the global capture session
         captureSession = sessionService.captureSession
+        // set the video capture preset resolution
+        captureSession.sessionPreset = .hd4K3840x2160
         // set up an input
         let videoInput: AVCaptureDeviceInput
         // set up an output
@@ -112,6 +126,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         logger.log("Ad did fail to present full screen content.", type: .info)
         if let barcode = barcode {
             openWebSearch(barcode)
+            clearBarcode()
         }
     }
     
@@ -128,7 +143,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         }
     }
     
-    // MARK: Lifecycle
+    // MARK: Lifecycle Overrides
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         
@@ -175,6 +190,11 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             logger.log("couldn't open web search for barcode.", type: .error)
         }
     }
+    
+    func clearBarcode() {
+        barcode = ""
+    }
+    
     func setUpPreviewLayer() {
         previewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
         previewLayer.frame = view.layer.bounds
@@ -189,14 +209,25 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             backgroundView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
         ])
         
+        //        let captureOutput = AVCaptureVideoDataOutput()
+        //        // TODO: Set video sample rate
+        //        captureOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+        //        captureOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default))
+        //        captureSession.addOutput(captureOutput)
+        
         startRunningCaptureSession()
     }
     
+    private func showAlert(withTitle title: String, message: String, actionButtonText: String) {
+        DispatchQueue.main.async {
+            let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(alertController, animated: true)
+        }
+    }
+    
     func failed() {
-        let ac = UIAlertController(title: "Scanning not supported", message: "Your device does not support scanning a code from an item. Please use a device with a camera.", preferredStyle: .alert)
-        ac.addAction(UIAlertAction(title: "OK", style: .default))
-        present(ac, animated: true)
-        //        captureSession = nil
+        showAlert(withTitle: "Scanning not supported", message: "Your device does not support scanning a code from an item. Please use a device with a camera.", actionButtonText: "OK")
     }
     
     func startRunningCaptureSession() {
@@ -207,36 +238,49 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        captureSession.stopRunning()
-        
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
             AudioServicesPlaySystemSound(SystemSoundID(kSystemSoundID_Vibrate))
             found(code: stringValue)
         }
-        
-        //        dismiss(animated: true)
     }
+    
+    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+        // TODO: Live Vision
+        guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else { return }
+        
+        let imageRequestHandler = VNImageRequestHandler(
+            cvPixelBuffer: pixelBuffer,
+            orientation: .right)
+        
+        do {
+            try imageRequestHandler.perform([detectBarcodeRequest])
+        } catch {
+            print(error)
+        }
+    }
+    
     
     func found(code: String) {
         if code.contains("http") {
             // TODO: Open it in Safari if has a URL associated, otherwise do a duck duck go api request
-            let payloadString = code
-            guard
-                let url = URL(string: payloadString),
-                ["http", "https"].contains(url.scheme?.lowercased())
-            else { return }
-            
-            let config = SFSafariViewController.Configuration()
-            config.entersReaderIfAvailable = true
-            
-            let safariVC = SFSafariViewController(url: url, configuration: config)
-            safariVC.delegate = self
-            
-            showGoogleAds()
-            
-            present(safariVC, animated: true)
+//            let payloadString = code
+//            guard
+//                let url = URL(string: payloadString),
+//                ["http", "https"].contains(url.scheme?.lowercased())
+//            else { return }
+//
+//            let config = SFSafariViewController.Configuration()
+//            config.entersReaderIfAvailable = true
+//
+//            let safariVC = SFSafariViewController(url: url, configuration: config)
+//            safariVC.delegate = self
+//
+//            showGoogleAds()
+//
+//            present(safariVC, animated: true)
+            observationHandler(payload: code)
         } else {
             showGoogleAds()
             barcode = code
@@ -263,30 +307,143 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
             interstitial?.present(fromRootViewController: self)
         } else {
             logger.log("Ad wasn't ready", type: .info)
-            if let barcode = barcode {
-                openWebSearch(barcode)
-            }
+//            if let barcode = barcode {
+//                if barcode.contains("http") {
+//                    observationHandler(payload: barcode)
+//                }
+//                openWebSearch(barcode)
+//            }
+        }
+    }
+}
+
+extension ViewController {
+    // MARK: - Camera
+    private func checkPermissions() {
+        // TODO: Checking permissions
+        switch AVCaptureDevice.authorizationStatus(for: .video) {
+            case .notDetermined:
+                AVCaptureDevice.requestAccess(for: .video) { [self] granted in
+                    if !granted {
+                        self.showPermissionsAlert()
+                    }
+                }
+            case .denied, .restricted:
+                showPermissionsAlert()
+            default:
+                return
         }
     }
     
-//    func performRequest(urlString: URL) {
-//        // 1. Create a URL
-//        let url = urlString
-//        logger.log("url = \(url)")
-//        // 2. Create a URL Session
-//        let session = URLSession(configuration: .default)
-//        // 3. Create a session task
-//        let task = session.dataTask(with: url) { (data, response, error) in
-//            if error != nil {
-//                logger.log(error!)
-//                return
-//            }
-//
-//            if let safeData = data {
-//                logger.log("data returned!")
-//            }
-//        }
-//        // 4. Start the task
-//        task.resume()
-//    }
+    //     private func setupCameraLiveView() {
+    //        // TODO: Setup captureSession
+    //        captureSession.sessionPreset = .hd1280x720
+    //
+    //        // TODO: Add input
+    //        let videoDevice = AVCaptureDevice
+    //            .default(.builtInWideAngleCamera, for: .video, position: .back)
+    //
+    //        guard
+    //            let device = videoDevice,
+    //            let videoDeviceInput = try? AVCaptureDeviceInput(device: device),
+    //            captureSession.canAddInput(videoDeviceInput) else {
+    //            showAlert(
+    //                withTitle: "Cannot Find Camera",
+    //                message: "There seems to be a problem with the camera on your device.")
+    //            return
+    //        }
+    //
+    //        captureSession.addInput(videoDeviceInput)
+    //
+    //        // TODO: Add output
+    //        let captureOutput = AVCaptureVideoDataOutput()
+    //        // TODO: Set video sample rate
+    //        captureOutput.videoSettings = [kCVPixelBufferPixelFormatTypeKey as String: Int(kCVPixelFormatType_32BGRA)]
+    //        captureOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: DispatchQoS.QoSClass.default))
+    //        captureSession.addOutput(captureOutput)
+    //
+    //        configurePreviewLayer()
+    //
+    //        // TODO: Run session
+    //        captureSession.startRunning()
+    //    }
+    
+    // MARK: - Vision
+    func processClassification(_ request: VNRequest) {
+        // 1
+        guard let barcodes = request.results else { return }
+        DispatchQueue.main.async { [self] in
+            if captureSession.isRunning {
+                view.layer.sublayers?.removeSubrange(1...)
+                
+                // 2
+                for barcode in barcodes {
+                    guard
+                        // TODO: Check for QR Code symbology and confidence score
+                        let potentialQRCode = barcode as? VNBarcodeObservation,
+                        potentialQRCode.confidence > 0.9
+                    else { return }
+                    
+                    // 3
+                    //                    showAlert(
+                    //                        withTitle: potentialQRCode.symbology.rawValue,
+                    //                        // TODO: Check the confidence score
+                    //                        message: String(potentialQRCode.confidence), actionButtonText: "OK")
+                    
+//                    if potentialQRCode.symbology == .QR {
+//                        print("wtf man")
+//                        observationHandler(payload: potentialQRCode.payloadStringValue)
+//                    } else {
+//                        print("is this thing on")
+//                        if let barcode = potentialQRCode.payloadStringValue {
+//                            found(code: barcode)
+//                        }
+//                    }
+                }
+            }
+            
+        }
+    }
+    
+    // MARK: - Handler
+    func observationHandler(payload: String?) {
+        // TODO: Open it in Safari
+        guard
+            let payloadString = payload,
+            let url = URL(string: payloadString),
+            ["http", "https"].contains(url.scheme?.lowercased())
+        else { return }
+        
+        let config = SFSafariViewController.Configuration()
+        config.entersReaderIfAvailable = true
+        
+        //        dismiss(animated: true)
+        let safariVC = SFSafariViewController(url: url, configuration: config)
+        safariVC.delegate = self
+        present(safariVC, animated: true)
+    }
+}
+
+extension ViewController {
+    private func configurePreviewLayer() {
+        let cameraPreviewLayer = AVCaptureVideoPreviewLayer(session: captureSession)
+        cameraPreviewLayer.videoGravity = .resizeAspectFill
+        cameraPreviewLayer.connection?.videoOrientation = .portrait
+        cameraPreviewLayer.frame = view.frame
+        view.layer.insertSublayer(cameraPreviewLayer, at: 0)
+    }
+    
+    private func showAlert(withTitle title: String, message: String) {
+        DispatchQueue.main.async {
+            let alertController = UIAlertController(title: title, message: message, preferredStyle: .alert)
+            alertController.addAction(UIAlertAction(title: "OK", style: .default))
+            self.present(alertController, animated: true)
+        }
+    }
+    
+    private func showPermissionsAlert() {
+        showAlert(
+            withTitle: "Camera Permissions",
+            message: "Please open Settings and grant permission for this app to use your camera.")
+    }
 }

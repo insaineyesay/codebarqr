@@ -21,6 +21,8 @@
 		F090A55926C2138C00756ACF /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = F090A55726C2138C00756ACF /* LaunchScreen.storyboard */; };
 		F090A56426C2138C00756ACF /* codebarqrTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F090A56326C2138C00756ACF /* codebarqrTests.swift */; };
 		F090A56F26C2138C00756ACF /* codebarqrUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F090A56E26C2138C00756ACF /* codebarqrUITests.swift */; };
+		F0B3190F26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B3190E26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift */; };
+		F0B3191226CC437500CDDE78 /* GoogleAdService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B3191126CC437500CDDE78 /* GoogleAdService.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -66,6 +68,8 @@
 		F090A56A26C2138C00756ACF /* codebarqrUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = codebarqrUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		F090A56E26C2138C00756ACF /* codebarqrUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = codebarqrUITests.swift; sourceTree = "<group>"; };
 		F090A57026C2138C00756ACF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		F0B3190E26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraViewController+CameraSession.swift"; sourceTree = "<group>"; };
+		F0B3191126CC437500CDDE78 /* GoogleAdService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAdService.swift; sourceTree = "<group>"; };
 		FBC489E298FE99B9B9A4D8D1 /* Pods-codebarqr-codebarqrUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-codebarqr-codebarqrUITests.release.xcconfig"; path = "Target Support Files/Pods-codebarqr-codebarqrUITests/Pods-codebarqr-codebarqrUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -123,6 +127,8 @@
 		F03F187826C761F70009E0F3 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				F0B3191026CC436800CDDE78 /* Vendor */,
+				F0B3190D26CC0DA500CDDE78 /* Extensions */,
 				F03F187926C762060009E0F3 /* Logging */,
 			);
 			path = Common;
@@ -199,6 +205,22 @@
 				F090A57026C2138C00756ACF /* Info.plist */,
 			);
 			path = codebarqrUITests;
+			sourceTree = "<group>";
+		};
+		F0B3190D26CC0DA500CDDE78 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				F0B3190E26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
+		F0B3191026CC436800CDDE78 /* Vendor */ = {
+			isa = PBXGroup;
+			children = (
+				F0B3191126CC437500CDDE78 /* GoogleAdService.swift */,
+			);
+			path = Vendor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -441,10 +463,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				F03F187B26C7621A0009E0F3 /* CodebarLogger.swift in Sources */,
+				F0B3191226CC437500CDDE78 /* GoogleAdService.swift in Sources */,
 				F090A55126C2138200756ACF /* ViewController.swift in Sources */,
 				F082F1F026C30E2600EC50B2 /* AVSessionService.swift in Sources */,
 				F090A54D26C2138200756ACF /* AppDelegate.swift in Sources */,
 				F090A54F26C2138200756ACF /* SceneDelegate.swift in Sources */,
+				F0B3190F26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
