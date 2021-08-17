@@ -232,7 +232,6 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         }
     }
     
-    
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
