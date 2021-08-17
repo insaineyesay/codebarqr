@@ -56,7 +56,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
                                request: request,
                                completionHandler: {[self] ad, error in
                                 if let error = error {
-                                    logger.log("Failed to load interstitial ad with error: ")
+                                    logger.logAds("Failed to load interstitial ad with error: %d", type: .error, param: nil)
+                                    logger.log("interstital ad error: \(error)", type: .error)
                                     return
                                 }
                                 interstitial = ad
@@ -108,7 +109,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad failed to present full screen content.
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        logger.log("Ad did fail to present full screen content.")
+        logger.log("Ad did fail to present full screen content.", type: .info)
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -116,12 +117,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad presented full screen content.
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        logger.log("Ad did present full screen content.")
+        logger.log("Ad did present full screen content.", type: .info)
     }
     
     /// Tells the delegate that the ad dismissed full screen content.
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        logger.log("Ad did dismiss full screen content.")
+        logger.log("Ad did dismiss full screen content.", type: .info)
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -170,6 +171,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     func openWebSearch(_ code: String) {
         if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
             UIApplication.shared.open(url)
+        } else {
+            logger.log("couldn't open web search for barcode.", type: .error)
         }
     }
     func setUpPreviewLayer() {
@@ -257,10 +260,9 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     func showGoogleAds() {
         // show google interstitial ad
         if interstitial != nil {
-            logger.log("google ads!")
             interstitial?.present(fromRootViewController: self)
         } else {
-            logger.log("Ad wasn't ready")
+            logger.log("Ad wasn't ready", type: .info)
             if let barcode = barcode {
                 openWebSearch(barcode)
             }
