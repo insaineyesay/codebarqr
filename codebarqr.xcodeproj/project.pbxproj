@@ -10,6 +10,7 @@
 		426BB4867698C9B7CE95DF56 /* Pods_codebarqrTests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 85154CACB8AA87865C174E7F /* Pods_codebarqrTests.framework */; };
 		803BFFE21D76CE741893CB2B /* Pods_codebarqr.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = B3783BEF33DEE8BB558E9580 /* Pods_codebarqr.framework */; };
 		8364554517555575B78B74B1 /* Pods_codebarqr_codebarqrUITests.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 1202D968A335DB6BF36A26BD /* Pods_codebarqr_codebarqrUITests.framework */; };
+		F03F187B26C7621A0009E0F3 /* CodebarLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = F03F187A26C7621A0009E0F3 /* CodebarLogger.swift */; };
 		F082F1F026C30E2600EC50B2 /* AVSessionService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F082F1EF26C30E2600EC50B2 /* AVSessionService.swift */; };
 		F082F1F226C54E6000EC50B2 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = F082F1F126C54E6000EC50B2 /* GoogleService-Info.plist */; };
 		F090A54D26C2138200756ACF /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F090A54C26C2138200756ACF /* AppDelegate.swift */; };
@@ -48,6 +49,7 @@
 		B3783BEF33DEE8BB558E9580 /* Pods_codebarqr.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_codebarqr.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		C1B249B92BC31F04AE8B2C1E /* Pods-codebarqr.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-codebarqr.release.xcconfig"; path = "Target Support Files/Pods-codebarqr/Pods-codebarqr.release.xcconfig"; sourceTree = "<group>"; };
 		C49566E45CE63D9636234FC3 /* Pods-codebarqr-codebarqrUITests.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-codebarqr-codebarqrUITests.debug.xcconfig"; path = "Target Support Files/Pods-codebarqr-codebarqrUITests/Pods-codebarqr-codebarqrUITests.debug.xcconfig"; sourceTree = "<group>"; };
+		F03F187A26C7621A0009E0F3 /* CodebarLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodebarLogger.swift; sourceTree = "<group>"; };
 		F082F1EF26C30E2600EC50B2 /* AVSessionService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVSessionService.swift; sourceTree = "<group>"; };
 		F082F1F126C54E6000EC50B2 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		F090A54926C2138200756ACF /* codebarqr.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = codebarqr.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -118,6 +120,22 @@
 			name = Frameworks;
 			sourceTree = "<group>";
 		};
+		F03F187826C761F70009E0F3 /* Common */ = {
+			isa = PBXGroup;
+			children = (
+				F03F187926C762060009E0F3 /* Logging */,
+			);
+			path = Common;
+			sourceTree = "<group>";
+		};
+		F03F187926C762060009E0F3 /* Logging */ = {
+			isa = PBXGroup;
+			children = (
+				F03F187A26C7621A0009E0F3 /* CodebarLogger.swift */,
+			);
+			path = Logging;
+			sourceTree = "<group>";
+		};
 		F082F1EE26C30DF300EC50B2 /* Session */ = {
 			isa = PBXGroup;
 			children = (
@@ -151,6 +169,7 @@
 		F090A54B26C2138200756ACF /* codebarqr */ = {
 			isa = PBXGroup;
 			children = (
+				F03F187826C761F70009E0F3 /* Common */,
 				F082F1EE26C30DF300EC50B2 /* Session */,
 				F090A54C26C2138200756ACF /* AppDelegate.swift */,
 				F090A54E26C2138200756ACF /* SceneDelegate.swift */,
@@ -421,6 +440,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				F03F187B26C7621A0009E0F3 /* CodebarLogger.swift in Sources */,
 				F090A55126C2138200756ACF /* ViewController.swift in Sources */,
 				F082F1F026C30E2600EC50B2 /* AVSessionService.swift in Sources */,
 				F090A54D26C2138200756ACF /* AppDelegate.swift in Sources */,

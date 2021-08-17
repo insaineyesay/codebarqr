@@ -14,6 +14,7 @@ import GoogleMobileAds
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate {
     // reference for the google ad interstitial
     private var interstitial: GADInterstitialAd?
+    let logger = CodebarLogger.shared
     // create an instance of the AV Session service
     var sessionService = AVSessionService.shared
     // Create a capture session to connect inputs and outputs to
@@ -55,7 +56,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
                                request: request,
                                completionHandler: {[self] ad, error in
                                 if let error = error {
-                                    print("Failed to load interstitial ad with error: \(error.localizedDescription)")
+                                    logger.logAds("Failed to load interstitial ad with error: %d", type: .error, param: nil)
+                                    logger.log("interstital ad error: \(error)", type: .error)
                                     return
                                 }
                                 interstitial = ad
@@ -107,7 +109,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad failed to present full screen content.
     func ad(_ ad: GADFullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
-        print("Ad did fail to present full screen content.")
+        logger.log("Ad did fail to present full screen content.", type: .info)
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -115,12 +117,12 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     /// Tells the delegate that the ad presented full screen content.
     func adDidPresentFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        print("Ad did present full screen content.")
+        logger.log("Ad did present full screen content.", type: .info)
     }
     
     /// Tells the delegate that the ad dismissed full screen content.
     func adDidDismissFullScreenContent(_ ad: GADFullScreenPresentingAd) {
-        print("Ad did dismiss full screen content.")
+        logger.log("Ad did dismiss full screen content.", type: .info)
         if let barcode = barcode {
             openWebSearch(barcode)
         }
@@ -169,6 +171,8 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     func openWebSearch(_ code: String) {
         if let url = URL(string: "https://google.com/search?q=\(code)&tbm=shop") {
             UIApplication.shared.open(url)
+        } else {
+            logger.log("couldn't open web search for barcode.", type: .error)
         }
     }
     func setUpPreviewLayer() {
@@ -203,7 +207,7 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     
     
     func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
-        //        captureSession.stopRunning()
+        captureSession.stopRunning()
         
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
@@ -256,34 +260,33 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
     func showGoogleAds() {
         // show google interstitial ad
         if interstitial != nil {
-            print("google ads!")
             interstitial?.present(fromRootViewController: self)
         } else {
-            print("Ad wasn't ready")
+            logger.log("Ad wasn't ready", type: .info)
             if let barcode = barcode {
                 openWebSearch(barcode)
             }
         }
     }
     
-    func performRequest(urlString: URL) {
-        // 1. Create a URL
-        let url = urlString
-        print("url = \(url)")
-        // 2. Create a URL Session
-        let session = URLSession(configuration: .default)
-        // 3. Create a session task
-        let task = session.dataTask(with: url) { (data, response, error) in
-            if error != nil {
-                print(error!)
-                return
-            }
-            
-            if let safeData = data {
-                print("data returned!")
-            }
-        }
-        // 4. Start the task
-        task.resume()
-    }
+//    func performRequest(urlString: URL) {
+//        // 1. Create a URL
+//        let url = urlString
+//        logger.log("url = \(url)")
+//        // 2. Create a URL Session
+//        let session = URLSession(configuration: .default)
+//        // 3. Create a session task
+//        let task = session.dataTask(with: url) { (data, response, error) in
+//            if error != nil {
+//                logger.log(error!)
+//                return
+//            }
+//
+//            if let safeData = data {
+//                logger.log("data returned!")
+//            }
+//        }
+//        // 4. Start the task
+//        task.resume()
+//    }
 }
