@@ -23,6 +23,7 @@
 		F090A56F26C2138C00756ACF /* codebarqrUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F090A56E26C2138C00756ACF /* codebarqrUITests.swift */; };
 		F0B3190F26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B3190E26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift */; };
 		F0B3191226CC437500CDDE78 /* GoogleAdService.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B3191126CC437500CDDE78 /* GoogleAdService.swift */; };
+		F0B3191526CC574200CDDE78 /* AdUnit.swift in Sources */ = {isa = PBXBuildFile; fileRef = F0B3191426CC574200CDDE78 /* AdUnit.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -70,6 +71,7 @@
 		F090A57026C2138C00756ACF /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		F0B3190E26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CameraViewController+CameraSession.swift"; sourceTree = "<group>"; };
 		F0B3191126CC437500CDDE78 /* GoogleAdService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleAdService.swift; sourceTree = "<group>"; };
+		F0B3191426CC574200CDDE78 /* AdUnit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdUnit.swift; sourceTree = "<group>"; };
 		FBC489E298FE99B9B9A4D8D1 /* Pods-codebarqr-codebarqrUITests.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-codebarqr-codebarqrUITests.release.xcconfig"; path = "Target Support Files/Pods-codebarqr-codebarqrUITests/Pods-codebarqr-codebarqrUITests.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -127,6 +129,7 @@
 		F03F187826C761F70009E0F3 /* Common */ = {
 			isa = PBXGroup;
 			children = (
+				F0B3191326CC572900CDDE78 /* Config */,
 				F0B3191026CC436800CDDE78 /* Vendor */,
 				F0B3190D26CC0DA500CDDE78 /* Extensions */,
 				F03F187926C762060009E0F3 /* Logging */,
@@ -221,6 +224,14 @@
 				F0B3191126CC437500CDDE78 /* GoogleAdService.swift */,
 			);
 			path = Vendor;
+			sourceTree = "<group>";
+		};
+		F0B3191326CC572900CDDE78 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				F0B3191426CC574200CDDE78 /* AdUnit.swift */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -466,6 +477,7 @@
 				F0B3191226CC437500CDDE78 /* GoogleAdService.swift in Sources */,
 				F090A55126C2138200756ACF /* ViewController.swift in Sources */,
 				F082F1F026C30E2600EC50B2 /* AVSessionService.swift in Sources */,
+				F0B3191526CC574200CDDE78 /* AdUnit.swift in Sources */,
 				F090A54D26C2138200756ACF /* AppDelegate.swift in Sources */,
 				F090A54F26C2138200756ACF /* SceneDelegate.swift in Sources */,
 				F0B3190F26CC0DD100CDDE78 /* CameraViewController+CameraSession.swift in Sources */,

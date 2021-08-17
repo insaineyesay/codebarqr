@@ -15,13 +15,18 @@ import Vision
 class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, SFSafariViewControllerDelegate, GADFullScreenContentDelegate, AVCaptureVideoDataOutputSampleBufferDelegate {
     // reference for the google ad interstitial
     private var interstitial: GADInterstitialAd?
+    // Logger
     let logger = CodebarLogger.shared
+    // AdUnitId
+    let adUnitID = AdUnitConfig.shared.adUnitID
     // create an instance of the AV Session service
     var sessionService = AVSessionService.shared
     // Create a capture session to connect inputs and outputs to
     var captureSession = AVCaptureSession()
     // Add a preview layer so that the camear input can be viewed
     var previewLayer: AVCaptureVideoPreviewLayer!
+    // Placeholder for barcode string
+    var barcode: String?
     // Create a UIView to act as a transparent layer over the camera view
     let backgroundView: UIView = {
         let v = UIView()
@@ -29,23 +34,17 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         v.backgroundColor = UIColor.black.withAlphaComponent(0.45)
         return v
     }()
+    // Reference placeholder for barcode request. Vision framework
     lazy var detectBarcodeRequest = VNDetectBarcodesRequest {
         request, error in
         guard error == nil else {
             self.showAlert(withTitle: "Barcode Error", message: error?.localizedDescription ?? "error", actionButtonText: "OK")
             return
         }
-        
+        // figure out if its a QR code
         self.processClassification(request)
     }
     
-    var barcode: String?
-    
-    #if DEBUG
-    var adUnitID = "ca-app-pub-3940256099942544/4411468910"
-    #else
-    var adUnitID = "ca-app-pub-7134449571312427/9058003570"
-    #endif
     
     // Reference to storyboard UIView
     @IBOutlet weak var camOverlayImageView: UIImageView!
@@ -64,18 +63,21 @@ class ViewController: UIViewController, AVCaptureMetadataOutputObjectsDelegate, 
         checkPermissions()
         // TODO: Need to move all Google Ad functionalities to a service
         let request = GADRequest()
-        GADInterstitialAd.load(withAdUnitID: adUnitID,
-                               request: request,
-                               completionHandler: {[self] ad, error in
-                                if let error = error {
-                                    logger.logAds("Failed to load interstitial ad with error: %d", type: .error, param: nil)
-                                    logger.log("interstital ad error: \(error)", type: .error)
-                                    return
-                                }
-                                interstitial = ad
-                                interstitial?.fullScreenContentDelegate = self
-                               })
+        if let adUnitID = adUnitID {
+            GADInterstitialAd.load(withAdUnitID: adUnitID,
+                                   request: request,
+                                   completionHandler: {[self] ad, error in
+                                    if let error = error {
+                                        logger.logAds("Failed to load interstitial ad with error: %d", type: .error, param: nil)
+                                        logger.log("interstital ad error: \(error)", type: .error)
+                                        return
+                                    }
+                                    interstitial = ad
+                                    interstitial?.fullScreenContentDelegate = self
+                                   })
+        }
         
+        // set the background color to black
         view.backgroundColor = UIColor.black
         // set the global capture session
         captureSession = sessionService.captureSession
